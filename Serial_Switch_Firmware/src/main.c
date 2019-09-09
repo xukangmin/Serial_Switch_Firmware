@@ -40,6 +40,7 @@ volatile int current_ch = 0;
 volatile int state = 0;
 	
 void configure_usart(void);
+void configure_gpio(void);
 
 //! [module_inst]
 struct usart_module usart_instance;
@@ -175,6 +176,63 @@ void configure_usart(void)
 }
 //! [setup]
 
+void configure_gpio(void) {
+	
+	struct port_config config_port_pin;
+	port_get_config_defaults(&config_port_pin);
+	config_port_pin.direction = PORT_PIN_DIR_OUTPUT;
+	port_pin_set_config(PIN_PA04, &config_port_pin);
+	port_pin_set_config(PIN_PA05, &config_port_pin);
+	port_pin_set_config(PIN_PA06, &config_port_pin);
+	port_pin_set_config(PIN_PA07, &config_port_pin);
+	port_pin_set_config(PIN_PA08, &config_port_pin);
+	port_pin_set_config(PIN_PA09, &config_port_pin);
+
+	port_pin_set_output_level(PIN_PA04, true);
+
+
+}
+
+void set_channel_led(int ch) {
+	switch(ch) {
+		case 0:
+			port_pin_set_output_level(PIN_PA05, true);
+			port_pin_set_output_level(PIN_PA06, false);
+			port_pin_set_output_level(PIN_PA07, false);
+			port_pin_set_output_level(PIN_PA08, false);
+			port_pin_set_output_level(PIN_PA09, false);
+			break;
+		case 1:
+			port_pin_set_output_level(PIN_PA05, false);
+			port_pin_set_output_level(PIN_PA06, true);
+			port_pin_set_output_level(PIN_PA07, false);
+			port_pin_set_output_level(PIN_PA08, false);
+			port_pin_set_output_level(PIN_PA09, false);
+			break;
+		case 2:
+			port_pin_set_output_level(PIN_PA05, false);
+			port_pin_set_output_level(PIN_PA06, false);
+			port_pin_set_output_level(PIN_PA07, true);
+			port_pin_set_output_level(PIN_PA08, false);
+			port_pin_set_output_level(PIN_PA09, false);
+			break;
+		case 3:
+			port_pin_set_output_level(PIN_PA05, false);
+			port_pin_set_output_level(PIN_PA06, false);
+			port_pin_set_output_level(PIN_PA07, false);
+			port_pin_set_output_level(PIN_PA08, true);
+			port_pin_set_output_level(PIN_PA09, false);
+			break;
+		case 4:
+			port_pin_set_output_level(PIN_PA05, false);
+			port_pin_set_output_level(PIN_PA06, false);
+			port_pin_set_output_level(PIN_PA07, false);
+			port_pin_set_output_level(PIN_PA08, false);
+			port_pin_set_output_level(PIN_PA09, true);
+			break;
+	}
+}
+
 int main(void)
 {
 	system_init();
@@ -182,18 +240,19 @@ int main(void)
 
 	configure_usart();
 
-	uint8_t string[] = "Hello World!\r\n";
-	usart_write_buffer_wait(&usart_instance, string, sizeof(string));
-	usart_write_buffer_wait(&usart_instance1, string, sizeof(string));
-	usart_write_buffer_wait(&usart_instance2, string, sizeof(string));
-	usart_write_buffer_wait(&usart_instance3, string, sizeof(string));
-	usart_write_buffer_wait(&usart_instance4, string, sizeof(string));
-	usart_write_buffer_wait(&usart_instance5, string, sizeof(string));
+	configure_gpio();
+	//uint8_t string[] = "hello world!\r\n";
+	//usart_write_buffer_wait(&usart_instance, string, sizeof(string));
+	//usart_write_buffer_wait(&usart_instance1, string, sizeof(string));
+	//usart_write_buffer_wait(&usart_instance2, string, sizeof(string));
+	//usart_write_buffer_wait(&usart_instance3, string, sizeof(string));
+	//usart_write_buffer_wait(&usart_instance4, string, sizeof(string));
+	//usart_write_buffer_wait(&usart_instance5, string, sizeof(string));
 		
 	uint16_t tmp;
 	uint8_t rev;
 	
-
+	set_channel_led(current_ch);
 	
 	while (true) {
 		if (usart_read_wait(&usart_instance, &tmp) == STATUS_OK) {
@@ -219,18 +278,23 @@ int main(void)
 			else if (state == 1) {
 				if (rev == 0x30) {
 					current_ch = 0;
+					set_channel_led(current_ch);
 				} 
 				else if (rev == 0x31) {
 					current_ch = 1;
+					set_channel_led(current_ch);
 				} 
 				else if (rev == 0x32) {
 					current_ch = 2;
+					set_channel_led(current_ch);
 				} 
 				else if (rev == 0x33) {
 					current_ch = 3;
+					set_channel_led(current_ch);
 				} 
 				else if (rev == 0x34) {
 					current_ch = 4;
+					set_channel_led(current_ch);
 				}
 				
 				state = 0;
